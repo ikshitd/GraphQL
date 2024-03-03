@@ -1,6 +1,8 @@
 const { UniqueArgumentNamesRule } = require("graphql");
 const users = require("../fakeData.js");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const _ = require("lodash");
 
 const resolvers = {
   Query: {
@@ -18,7 +20,26 @@ const resolvers = {
       models.User.create(user);
       return user;
     },
-    login: (parent, args, { models }) => {},
+    login: async (parent, { email, password }, { models, SECRET }) => {
+      const user = await models.User.findOne({ where: { email } });
+      if (!user) {
+        throw new Error("No user with that email");
+      }
+      const valid = await bcrypt.compare(password, user.password);
+      if (!valid) {
+        throw new Error("Incorrect password");
+      }
+      const token = jwt.sign(
+        {
+          user: _.pick(user, ["id", "userName"]),
+        },
+        SECRET,
+        {
+          expiresIn: "1y",
+        }
+      );
+      return token;
+    },
     deleteUser: (parent, args, { models }) => {
       models.User.destroy({ where: args });
       return 1;

@@ -7,11 +7,17 @@ const cors = require("cors");
 const app = new express();
 const port = 3000;
 
+const SECRET = "jfdjfkdjfiwu923892839283fuiaadfjdkfj";
+
 const models = require("./models");
 app.use(cors());
 
 const startServer = async () => {
-  const server = new ApolloServer({ typeDefs, resolvers, context: { models } });
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    context: { models, SECRET },
+  });
   await server.start();
   server.applyMiddleware({ app });
 };
