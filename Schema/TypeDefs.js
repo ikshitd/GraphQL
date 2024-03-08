@@ -9,6 +9,8 @@ const typeDefs = gql`
   type Query {
     getAllUsers: [User!]!
     getUser(userName: String!): User!
+    me: User!
+    getCurrentLoggedInUser: User!
   }
   type Mutation {
     deleteUser(userName: String!): Int!

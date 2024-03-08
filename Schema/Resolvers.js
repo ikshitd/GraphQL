@@ -1,5 +1,4 @@
 const { UniqueArgumentNamesRule } = require("graphql");
-const users = require("../fakeData.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const _ = require("lodash");
@@ -9,8 +8,18 @@ const resolvers = {
     getAllUsers: (parent, args, { models }) => {
       return models.User.findAll();
     },
+    me: (parent, args, { models, user }) => {
+      if (user) {
+        return models.User.findOne({ where: { userName: user.user.userName } });
+      } else {
+        throw new Error("no user is logged in !!");
+      }
+    },
     getUser: (parent, { userName }, { models }) => {
       return models.User.findOne({ where: { userName } });
+    },
+    getCurrentLoggedInUser: async (parent, args) => {
+      throw new Error("i don't know who you are");
     },
   },
   Mutation: {
@@ -20,7 +29,11 @@ const resolvers = {
       models.User.create(user);
       return user;
     },
-    login: async (parent, { email, password }, { models, SECRET }) => {
+    login: async (
+      parent,
+      { email, password },
+      { req, res, models, SECRET }
+    ) => {
       const user = await models.User.findOne({ where: { email } });
       if (!user) {
         throw new Error("No user with that email");
