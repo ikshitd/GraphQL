@@ -24,5 +24,15 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
   });
+  User.associate = (models) => {
+    // one to many relation with board
+    User.hasMany(models.Board, {
+      foreignKey: "owner",
+    });
+    // one to many relation with Suggestion
+    User.hasMany(models.Suggestion, {
+      foreignKey: "creatorId",
+    });
+  };
   return User;
 };
